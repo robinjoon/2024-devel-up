@@ -5,15 +5,17 @@
 # This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
 
-name: Gradle Package
+name: CD
 
 on:
-  pull_request:
-    types: [ closed ]
-    branches: [ 'main' ]
+  workflow_dispatch:
+  # pull_request:
+  #   types: [ closed ]
+  #   branches: [ 'main' ]
 
 jobs:
-  build:
+  CD:
+    if: ${{ contains(github.event.pull_request.labels.*.name, '백엔드') }}
     runs-on: self-hosted
     permissions:
       contents: read
@@ -22,12 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Early exit
-        if: ${{ !contains(github.event.pull_request.labels.*.name, '백엔드') }}
-        run: |
-          gh run cancel ${{ github.run_id }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
