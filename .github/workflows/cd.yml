@@ -48,8 +48,9 @@ jobs:
 
       - name: slack mention when build success
         if: ${{steps.gradle_build.outcome == 'success' && steps.deploy.outcome == 'success'}}
-        uses: ./.github/workflows/notify.yml
+        uses: slackapi/slack-github-action@v1.24.0
         with:
+          channel-id: ${{ secrets.ISSUE_CHANNEL }}
           payload: |
             {
                 "text": "pr 머지",
@@ -63,11 +64,14 @@ jobs:
                   }
                 ]
             }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       - name: slack mention when build fail
         if: ${{steps.gradle_build.outcome == 'failure' && steps.deploy.outcome == 'failure'}}
-        uses: ./.github/workflows/notify.yml
+        uses: slackapi/slack-github-action@v1.24.0
         with:
+          channel-id: ${{ secrets.ISSUE_CHANNEL }}
           payload: |
             {
                 "text": "pr 머지",
@@ -81,11 +85,14 @@ jobs:
                   }
                 ]
             }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       - name: Call notify when build fail
         if: ${{steps.gradle_build.outcome == 'success' && steps.deploy.outcome == 'failure'}}
-        uses: ./.github/workflows/notify.yml
+        uses: slackapi/slack-github-action@v1.24.0
         with:
+          channel-id: ${{ secrets.ISSUE_CHANNEL }}
           payload: |
             {
                 "text": "pr 머지",
@@ -99,3 +106,5 @@ jobs:
                   }
                 ]
             }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
