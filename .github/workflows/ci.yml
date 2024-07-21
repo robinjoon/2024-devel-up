@@ -49,6 +49,11 @@ jobs:
     needs: BE_CI
     if: ${{needs.BE_CI.result != 'skipped'}}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Get teamMember List
         id: teamMembers
         uses: actions/github-script@v6
@@ -94,6 +99,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -132,6 +139,11 @@ jobs:
     needs: [FE_CI]
     if: ${{needs.FE_CI.result != 'skipped'}}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Get teamMember List
         id: teamMembers
         uses: actions/github-script@v6
