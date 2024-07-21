@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: checkout
+        uses: actions/checkout@v4
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v1.24.0
         with:
