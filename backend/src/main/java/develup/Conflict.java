@@ -8,4 +8,5 @@ public class Conflict {
         this.id = id;
         this.name = name;
     }
+
 }
