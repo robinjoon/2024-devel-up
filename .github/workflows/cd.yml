@@ -8,15 +8,14 @@
 name: CD
 
 on:
-  workflow_dispatch:
-  # pull_request:
-  #   types: [ closed ]
-  #   branches: [ 'main' ]
+  pull_request:
+    types: [ closed ]
+    branches: [ 'main' ]
 
 jobs:
   CD:
     if: ${{ contains(github.event.pull_request.labels.*.name, '백엔드') }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -42,10 +41,15 @@ jobs:
           cd backend
           ./gradlew build
 
-      - name: slack mention
-        uses: slackapi/slack-github-action@v1.24.0
+      - name: Deploy
+        continue-on-error: true
+        id: deploy
+        run: ls
+
+      - name: slack mention when build success
+        if: ${{steps.gradle_build.outcome == 'success' && steps.deploy.outcome == 'success'}}
+        uses: ./.github/workflows/notify.yml
         with:
-          channel-id: ${{ secrets.ISSUE_CHANNEL }}
           payload: |
             {
                 "text": "pr 머지",
@@ -54,11 +58,44 @@ jobs:
                       "type": "section",
                       "text": {
                         "type": "mrkdwn",
-                        "text": "<@channel> pr이 main에 머지되었습니다. \n • PR 링크: <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>"
+                        "text": "테스트 메세지 입니다.  pr이 main에 머지되었습니다. \n • PR 링크: <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>"
                       }
                   }
                 ]
             }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
+      - name: slack mention when build fail
+        if: ${{steps.gradle_build.outcome == 'failure' && steps.deploy.outcome == 'failure'}}
+        uses: ./.github/workflows/notify.yml
+        with:
+          payload: |
+            {
+                "text": "pr 머지",
+                "blocks": [
+                  {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "테스트 메세지 입니다.  pr이 main에 머지되었습니다. 🚨그러나 빌드가 실패합니다!!!🚨 \n • PR 링크: <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>"
+                      }
+                  }
+                ]
+            }
+
+      - name: Call notify when build fail
+        if: ${{steps.gradle_build.outcome == 'success' && steps.deploy.outcome == 'failure'}}
+        uses: ./.github/workflows/notify.yml
+        with:
+          payload: |
+            {
+                "text": "pr 머지",
+                "blocks": [
+                  {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "테스트 메세지 입니다.  pr이 main에 머지되었습니다. ⚠️그러나 배포에 실패했습니다!⚠️ \n • PR 링크: <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>"
+                      }
+                  }
+                ]
+            }

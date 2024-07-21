@@ -1,0 +1,21 @@
+name: Notify
+
+on:
+  workflow_call:
+    inputs:
+      payload:
+        required: true
+        type: string
+
+jobs:
+  send_notification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.ISSUE_CHANNEL }}
+          payload: ${{ inputs.payload }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
